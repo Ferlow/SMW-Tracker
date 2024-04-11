@@ -4,7 +4,9 @@
   "description": "An electron app that tracks deaths, exits cleared and time passed since hack started for SMW romhacks, utilising Qusb2Snes.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-packager . --overwrite --platform=win32 --arch=ia32 --prune=true --out=release-builds",
+    "dist": "electron-builder"
   },
   "repository": {
     "type": "git",
@@ -16,11 +18,24 @@
     "url": "https://github.com/Ferlow/SMW-Tracker/issues"
   },
   "homepage": "https://github.com/Ferlow/SMW-Tracker#readme",
+  "build": {
+    "appId": "com.ferlow.smw-tracker",
+    "productName": "SMW Tracker",
+    "directories": {
+      "output": "release-builds"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "build/icons/icon.png"
+    }
+  },
   "dependencies": {
     "ejs": "^3.1.9",
     "express": "^4.19.2"
   },
   "devDependencies": {
-    "electron": "^29.3.0"
+    "electron": "^29.3.0",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
   }
 }

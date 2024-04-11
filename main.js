@@ -44,7 +44,8 @@ function stopServer() {
 function createWindow() {
     mainWindow = new BrowserWindow({ // Assign to mainWindow directly
         width: 800,
-        height: 600,
+        height: 350,
+        resizable: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -53,6 +54,8 @@ function createWindow() {
 
     // Load the GUI HTML file
     mainWindow.loadFile(path.join(__dirname, 'frontend', 'gui.html'));
+
+    mainWindow.setMenuBarVisibility(false);
 
     // Nullify mainWindow when the window is closed.
     mainWindow.on('closed', () => {
@@ -73,6 +76,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
+
     }
 });
 

@@ -1,6 +1,11 @@
-const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron')
+const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron');
+const { setupTitlebar, attachTitlebarToWindow } = require('custom-electron-titlebar/main');
 const express = require('express');
 const path = require('path');
+
+// ugly hack to remove menu
+const menu = new Menu()
+Menu.setApplicationMenu(menu)
 
 // Tray
 let tray = null;
@@ -48,14 +53,18 @@ function stopServer() {
     }
 }
 
+setupTitlebar();
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 350,
+        titleBarStyle: 'hidden',
         resizable: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
+            sandbox: false
         }
     });
 
@@ -65,7 +74,8 @@ function createWindow() {
     mainWindow.setMenuBarVisibility(false);
 
     // Create the Tray instance
-    tray = new Tray('build/icons/icon.png') // Update this path to your icon file
+    const iconPath = path.join(__dirname, 'build', 'icons', 'icon.png');
+    tray = new Tray(iconPath);
     const contextMenu = Menu.buildFromTemplate([
         {
             label: 'Open', click: function () {
@@ -96,6 +106,8 @@ function createWindow() {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
+
+    attachTitlebarToWindow(mainWindow);
 }
 
 // When app is ready, open the window

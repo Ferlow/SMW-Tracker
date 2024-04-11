@@ -27,9 +27,16 @@
     "win": {
       "target": "portable",
       "icon": "build/icons/icon.png"
-    }
+    },
+    "files": [
+      "**/*",
+      "!**/node_modules/*",
+      "!**/*.log",
+      "build/**/*"
+    ]
   },
   "dependencies": {
+    "custom-electron-titlebar": "^4.2.8",
     "ejs": "^3.1.9",
     "express": "^4.19.2"
   },

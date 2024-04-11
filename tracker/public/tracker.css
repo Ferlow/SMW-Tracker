@@ -14,7 +14,7 @@ body {
 }
 
 #title {
-  font-size: 30px; 
+  font-size: 30px;
   font-weight: bold;
   margin-bottom: 10px;
 }
@@ -31,7 +31,9 @@ body {
   justify-content: center;
 }
 
-.time, .death, .exits {
+.time,
+.death,
+.exits {
   font-size: 28px;
   font-weight: bold;
   margin: 10px 0;

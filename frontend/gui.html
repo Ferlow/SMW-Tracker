@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SMW Tracker</title>
+</head>
+
+<body>
+    <h1>SMW Tracker</h1>
+    <p id="serverStatus">Server is stopped</p>
+    <form id="configForm">
+        <div>
+            <label for="hackName">Hack name:</label>
+            <input type="text" id="hackName" name="hackName" placeholder="Enter hack name">
+        </div>
+        <div>
+            <label for="author">Author:</label>
+            <input type="text" id="author" name="author" placeholder="Enter author">
+        </div>
+    </form>
+    <button id="startServer">Start Server</button>
+    <button id="stopServer" disabled>Stop Server</button>
+
+    <script>
+    window.electronAPI.onServerStatus((event, isRunning) => {
+        const startButton = document.getElementById('startServer');
+        const stopButton = document.getElementById('stopServer');
+        const inputs = document.querySelectorAll('#configForm input');
+
+        // Disable inputs and start button, enable stop button when server is running
+        inputs.forEach(input => {
+            input.disabled = isRunning;
+        });
+        startButton.disabled = isRunning;
+        stopButton.disabled = !isRunning;
+
+        // Optionally, update server status text
+        document.getElementById('serverStatus').textContent = isRunning ? 'Server is running' : 'Server is stopped';
+    });
+
+        document.getElementById('startServer').addEventListener('click', function () {
+            const hackName = document.getElementById('hackName').value;
+            const author = document.getElementById('author').value;
+            window.electronAPI.startServer({ hackName, author });
+        });
+
+        document.getElementById('stopServer').addEventListener('click', function () {
+            window.electronAPI.stopServer();
+        });
+    </script>
+</body>
+
+</html>

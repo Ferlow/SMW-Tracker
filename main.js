@@ -1,10 +1,15 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron')
 const express = require('express');
 const path = require('path');
+
+// Tray
+let tray = null;
+
 // Express
 const serverApp = express();
 let server = null; // Express server instance
 const port = 3000;
+
 // Rom hacks
 let hackName = "Default Hack Name";
 let author = "Default Author";
@@ -35,14 +40,16 @@ function stopServer() {
     if (server) {
         server.close(() => {
             console.log(`Server stopped`);
-            mainWindow.webContents.send('server-status', false); // Notify renderer the server has stopped
+            if (mainWindow) {
+                mainWindow.webContents.send('server-status', false); // Notify renderer the server has stopped
+            }
         });
         server = null;
     }
 }
 
 function createWindow() {
-    mainWindow = new BrowserWindow({ // Assign to mainWindow directly
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 350,
         resizable: false,
@@ -57,27 +64,50 @@ function createWindow() {
 
     mainWindow.setMenuBarVisibility(false);
 
+    // Create the Tray instance
+    tray = new Tray('build/icons/icon.png') // Update this path to your icon file
+    const contextMenu = Menu.buildFromTemplate([
+        {
+            label: 'Open', click: function () {
+                mainWindow.show()
+            }
+        },
+        {
+            label: 'Quit', click: function () {
+                app.quit()
+            }
+        }
+    ])
+    tray.setToolTip('Your App Name')
+    tray.setContextMenu(contextMenu)
+
+    // Minimize mainWindow to the system tray
+    mainWindow.on('minimize', function (event) {
+        event.preventDefault()
+        mainWindow.hide()
+    })
+
+    // Show the mainWindow when the tray icon is clicked
+    tray.on('click', function () {
+        mainWindow.show()
+    })
+
     // Nullify mainWindow when the window is closed.
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
 }
 
-// Whenapp is ready, open the window
+// When app is ready, open the window
 app.whenReady().then(createWindow);
 
 // Quit when all windows are closed, except on macOS
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+app.on('window-all-closed', function () {
+    if (process.platform !== 'darwin') app.quit()
 });
 
-app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-
-    }
+app.on('activate', function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
 });
 
 ipcMain.on('start-server', (event, data) => {

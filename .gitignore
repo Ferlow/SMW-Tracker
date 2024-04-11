@@ -5,6 +5,7 @@ node_modules/
 /out/
 /dist/
 /build/
+/release-builds/
 
 # Ignore environment variables file
 .env

@@ -38,7 +38,8 @@
   "dependencies": {
     "custom-electron-titlebar": "^4.2.8",
     "ejs": "^3.1.9",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "electron": "^29.3.0",

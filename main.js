@@ -2,6 +2,8 @@ const { app, BrowserWindow, Tray, Menu, ipcMain } = require('electron');
 const { setupTitlebar, attachTitlebarToWindow } = require('custom-electron-titlebar/main');
 const express = require('express');
 const path = require('path');
+const QUSB2SNESConnection = require('./2snesbridge.js');
+let qusbConnection = new QUSB2SNESConnection('ws://localhost:8080');
 
 // ugly hack to remove menu
 const menu = new Menu()
@@ -111,7 +113,10 @@ function createWindow() {
 }
 
 // When app is ready, open the window
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    createWindow();
+    qusbConnection.connect();
+});
 
 // Quit when all windows are closed, except on macOS
 app.on('window-all-closed', function () {

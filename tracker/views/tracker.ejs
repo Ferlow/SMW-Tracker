@@ -22,6 +22,28 @@
             <div id="totalExits" class="exits"></div>
         </div>
     </div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:3000');
+      
+        socket.onopen = function(event) {
+          console.log('Connection established');
+        };
+      
+        socket.onmessage = function(event) {
+          console.log('Message from server ', event.data);
+          // Here you can handle incoming messages, update DOM, etc.
+        };
+      
+        socket.onerror = function(error) {
+          console.log('WebSocket error: ' + error);
+        };
+      
+        function sendMessageToServer(msg) {
+          socket.send(msg);
+        }
+      </script>
+      
 </body>
 
 </html>

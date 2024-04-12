@@ -10,7 +10,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 window.addEventListener('DOMContentLoaded', () => {
     // Title bar implementation
     new Titlebar({
-        
         overflow: 'auto',
         backgroundColor: TitlebarColor.fromHex('#f0f0f1'),
         maximizable: false,

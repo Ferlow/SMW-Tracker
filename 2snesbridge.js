@@ -74,6 +74,7 @@ class QUSB2SNESConnection {
 
     requestDeviceList() {
         this.ask({ Opcode: 'DeviceList', Space: 'SNES' }, response => {
+            console.log(JSON.parse(response.toString()).Results);
             const devices = JSON.parse(response.toString()).Results;
             if (devices.length) {
                 this.attachToDevice(devices[0]);

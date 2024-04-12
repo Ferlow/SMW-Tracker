@@ -30,3 +30,5 @@ yarn-error.log*
 
 # Ignore references
 /public_archive/
+
+# ignore userData

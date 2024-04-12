@@ -1,25 +1,33 @@
 const WebSocket = require('ws');
 
 class QUSB2SNESConnection {
-    constructor(url) {
+    constructor(url, eventCallbacks) {
         this.url = url;
         this.connection = null;
         this.answers = [];
         this.lastValue = {}; // Store last values for monitored addresses
+        this.eventCallbacks = eventCallbacks; // Object containing various event callbacks
+
         this.monitorConfig = {
             'F50071': {
                 condition: value => value === 9,
-                action: () => console.log('Player died')
+                action: () => this.triggerEvent('death')
             },
             'F50100': {
                 condition: value => value === 11,
-                action: () => console.log('Timer started')
+                action: () => this.triggerEvent('timerStart')
             },
             'F51F2E': {
                 condition: value => value,
-                action: value => console.log(`Number of exits updated to ${value}`)
+                action: value => this.triggerEvent('exitUpdate', value)
             }
         };
+    }
+
+    triggerEvent(eventName, value) {
+        if (this.eventCallbacks && typeof this.eventCallbacks[eventName] === 'function') {
+            this.eventCallbacks[eventName](value); // Call the callback, passing value if provided
+        }
     }
 
     connect() {

@@ -3,7 +3,7 @@ const { setupTitlebar, attachTitlebarToWindow } = require('custom-electron-title
 const express = require('express');
 const path = require('path');
 const QUSB2SNESConnection = require('./2snesbridge.js');
-let qusbConnection = new QUSB2SNESConnection('ws://localhost:8080');
+
 
 // ugly hack to remove menu
 const menu = new Menu()
@@ -33,6 +33,22 @@ serverApp.set('view engine', 'ejs');
 serverApp.get('/', (req, res) => {
     res.render('tracker', { hackName: hackName, author: author });
 });
+
+// Callbacks for QUSB2SNESConnection events
+const eventCallbacks = {
+    death: () => {
+        console.log('Player died');
+        // Additional logic for handling death
+    },
+    timerStart: () => {
+        console.log('Timer started');
+        // Additional logic for handling timer start
+    },
+    exitUpdate: (exits) => {
+        console.log(`Number of exits updated to ${exits}`);
+        // Additional logic for handling exits update
+    }
+};
 
 // Start the Express server
 function startServer() {
@@ -111,6 +127,8 @@ function createWindow() {
 
     attachTitlebarToWindow(mainWindow);
 }
+
+let qusbConnection = new QUSB2SNESConnection('ws://localhost:8080', eventCallbacks);
 
 // When app is ready, open the window
 app.whenReady().then(() => {

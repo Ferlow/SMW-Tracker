@@ -3,6 +3,7 @@ const { setupTitlebar, attachTitlebarToWindow } = require('custom-electron-title
 const express = require('express');
 const path = require('path');
 const QUSB2SNESConnection = require('./2snesbridge.js');
+const WebSocket = require('ws');
 
 
 // ugly hack to remove menu
@@ -16,6 +17,9 @@ let tray = null;
 const serverApp = express();
 let server = null; // Express server instance
 const port = 3000;
+
+// WSS 
+let wss;  // WebSocket Server instance
 
 // Rom hacks
 let hackName = "Default Hack Name";
@@ -55,19 +59,49 @@ function startServer() {
     server = serverApp.listen(port, () => {
         console.log(`Server started on port ${port}`);
         mainWindow.webContents.send('server-status', true); // Notify renderer the server has started
+        startWebSocketServer();
     });
 }
 
 // Stop the Express server
 function stopServer() {
     if (server) {
+        stopWebSocketServer();
         server.close(() => {
             console.log(`Server stopped`);
             if (mainWindow) {
                 mainWindow.webContents.send('server-status', false); // Notify renderer the server has stopped
             }
+            server = null;
+            
         });
         server = null;
+    }
+}
+
+function startWebSocketServer() {
+    wss = new WebSocket.Server({ server });
+    wss.on('connection', function connection(ws) {
+        ws.on('message', function incoming(message) {
+            console.log('received: %s', message);
+            ws.send('Echo from server: ' + message);
+        });
+        ws.send('WebSocket connection established');
+    });
+}
+
+function stopWebSocketServer() {
+    if (wss) {
+        // Close all active WebSocket connections
+        wss.clients.forEach(function each(client) {
+            client.close();
+        });
+
+        // Close the WebSocket server
+        wss.close(() => {
+            console.log('WebSocket Server stopped');
+        });
+        wss = null; // Clear the WebSocket server reference
     }
 }
 

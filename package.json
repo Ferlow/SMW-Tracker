@@ -20,6 +20,8 @@
   "homepage": "https://github.com/Ferlow/SMW-Tracker#readme",
   "build": {
     "appId": "com.ferlow.smw-tracker",
+    "asar": true,
+    "asarUnpack": "**/userData/**/*",
     "productName": "SMW Tracker",
     "directories": {
       "output": "release-builds"

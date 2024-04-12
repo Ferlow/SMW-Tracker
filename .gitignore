@@ -32,3 +32,4 @@ yarn-error.log*
 /public_archive/
 
 # ignore userData
+/userData/

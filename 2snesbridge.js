@@ -10,16 +10,18 @@ class QUSB2SNESConnection {
 
         this.monitorConfig = {
             'F50071': {
-                condition: value => value === 9,
-                action: () => this.triggerEvent('death')
+            condition: value => value === 9,
+            action: () => this.triggerEvent('death')
             },
             'F50100': {
-                condition: value => value === 11,
-                action: () => this.triggerEvent('timerStart')
+            condition: value => value === 11,
+            action: () => {
+                this.triggerEvent('timerStart');
+            }
             },
             'F51F2E': {
-                condition: value => value,
-                action: value => this.triggerEvent('exitUpdate', value)
+            condition: value => value,
+            action: value => this.triggerEvent('exitUpdate', value)
             }
         };
     }

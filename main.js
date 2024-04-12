@@ -4,6 +4,7 @@ const express = require('express');
 const path = require('path');
 const QUSB2SNESConnection = require('./2snesbridge.js');
 const WebSocket = require('ws');
+const DeathTracker = require('./deathTracker.js');
 
 
 // ugly hack to remove menu
@@ -41,16 +42,29 @@ serverApp.get('/', (req, res) => {
 // Callbacks for QUSB2SNESConnection events
 const eventCallbacks = {
     death: () => {
+        deathsTracking.addDeath();
         console.log('Player died');
-        // Additional logic for handling death
+        broadcast({ type: 'death', message: deathsTracking.getDeaths() });
     },
     timerStart: () => {
         console.log('Timer started');
-        // Additional logic for handling timer start
+        deathsTracking.startTimer();
+        if (!global.timerBroadcastInterval) {
+            global.timerBroadcastInterval = setInterval(() => {
+                broadcast({ type: 'timer', message: deathsTracking.getElapsedTime() });
+            }, 1000); // Broadcast every second
+        }
+    },
+    timerStop: () => {
+        console.log('Timer stopped');
+        clearInterval(global.timerBroadcastInterval);
+        global.timerBroadcastInterval = null;
+        deathsTracking.stopTimer();
+        broadcast({ type: 'timer', message: deathsTracking.getElapsedTime() });
     },
     exitUpdate: (exits) => {
-        console.log(`Number of exits updated to ${exits}`);
-        // Additional logic for handling exits update
+        deathsTracking.setExits(exits);
+        broadcast({ type: 'exit', message: deathsTracking.getExits() });
     }
 };
 
@@ -82,6 +96,8 @@ function stopServer() {
 function startWebSocketServer() {
     wss = new WebSocket.Server({ server });
     wss.on('connection', function connection(ws) {
+        const testMessage = JSON.stringify({ type: 'test', message: 'Hello, world!' });
+        ws.send(testMessage); // Send test message on new connection
         ws.on('message', function incoming(message) {
             console.log('received: %s', message);
             ws.send('Echo from server: ' + message);
@@ -90,7 +106,23 @@ function startWebSocketServer() {
     });
 }
 
+// Broadcast to all clients
+function broadcast(data) {
+    if (!wss || !wss.clients) {
+        console.error("WebSocket server is not initialized or clients are undefined.");
+        return;
+    }
+    const jsonData = JSON.stringify(data); // Convert data to JSON string
+    wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(jsonData); // Send JSON-formatted string
+        }
+    });
+}
+
+
 function stopWebSocketServer() {
+    broadcast({ type: 'timer', message: 'stopped' });
     if (wss) {
         // Close all active WebSocket connections
         wss.clients.forEach(function each(client) {
@@ -163,6 +195,7 @@ function createWindow() {
 }
 
 let qusbConnection = new QUSB2SNESConnection('ws://localhost:8080', eventCallbacks);
+let deathsTracking = new DeathTracker();
 
 // When app is ready, open the window
 app.whenReady().then(() => {
@@ -191,5 +224,9 @@ ipcMain.on('stop-server', () => {
 
 // Ensure the server is stopped when the app is about to quit
 app.on('will-quit', () => {
+    if (global.timerBroadcastInterval) {
+        clearInterval(global.timerBroadcastInterval);
+    }
+    deathsTracking.stopTimer();
     stopServer();
 });

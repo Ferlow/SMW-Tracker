@@ -6,7 +6,10 @@ jobs:
   close_pr:
     runs-on: ubuntu-latest
     steps:
-    - name: Close Pull Request
-      uses: peter-evans/close-pull-request@v1
-      with:
-        comment: "Pull requests are not accepted on this repository."
+      - name: Close Pull
+        uses: peter-evans/close-pull@v3
+        with:
+          pull-request-number: 1
+          comment: Auto-closing pull request
+          delete-branch: true
+

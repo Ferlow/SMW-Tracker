@@ -5,7 +5,7 @@
 ## Disclaimer
 This app was originally written for my own purposes to utilise it myself and get a better understanding of nodejs and Electron.
 
-I take no responsibilities for things breaking or not working correctly. For more information see the Collaboration guidelines.
+I take no responsibilities for things breaking or not working correctly. For more information see the See the [Collaboration Guidelines](#collaboration-guidelines) for more details.
 
 ## About
 

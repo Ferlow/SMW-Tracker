@@ -34,7 +34,10 @@
       "**/*",
       "!**/node_modules/*",
       "!**/*.log",
-      "build/**/*"
+      "build/**/*",
+      "!README.md",
+      "!LICENCE",
+      "!readme-resources{,/**/*}"
     ]
   },
   "dependencies": {

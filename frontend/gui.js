@@ -38,3 +38,30 @@ startButton.addEventListener('click', function () {
 stopButton.addEventListener('click', function () {
     window.electronAPI.stopServer();
 });
+
+window.electronAPI.onLoadData((event, data) => {
+    hackNameInput.value = data.hackName;
+    authorInput.value = data.author;
+
+    checkInputs();
+});
+
+window.electronAPI.onSaveData(() => {
+    const data = { 
+        hackName: hackNameInput.value, 
+        author: authorInput.value 
+    }; // Get the data you want to send
+    console.log(data);
+    window.electronAPI.sendSaveData(data);
+});
+
+window.electronAPI.onCloseSaveDate(() => {
+    const data = { 
+        hackName: hackNameInput.value, 
+        author: authorInput.value 
+    }; // Get the data you want to send
+    console.log(data);
+    window.electronAPI.sendSaveData(data);
+    window.electronAPI.sendCloseSaveData(data);
+    console.log("close!!!");
+});

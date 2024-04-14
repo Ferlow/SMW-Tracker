@@ -35,7 +35,7 @@ First you need to set up your SNES/Emulator to work with [QUsb2Snes](https://ska
 * When you want to stop, simply stop the server or close the app.
 * On next startup, the GUI should show your last entered details
 * It also saves your stats from previous sessions, make sure to enter the same name.
-  * (Save data can be found at: SMW Tracker\resources\app.asar.unpacked\userData)
+  * (Save data can be found at: %appdata%\smw-tracker\saveData.json)
 
 ## Collaboration guidelines
 I am not currently accepting pull requests, as this is a hobby/passion project for my own entertainment.

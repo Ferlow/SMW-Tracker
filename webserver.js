@@ -4,6 +4,9 @@ const express = require('express');
 const WebSocket = require('ws');
 const DeathTracker = require('./deathTracker.js');
 const QUSB2SNESConnection = require('./2snesbridge.js');
+const electron = require('electron');
+const app = electron.app || electron.remote.app;
+
 
 const serverApp = express();
 const port = 3000;
@@ -11,10 +14,15 @@ let server;
 let wss;
 let snes;
 let statTracker = new DeathTracker();
-const statsFilePath = path.join(__dirname, 'userdata', 'saveData.json');
+// const statsFilePath = path.join(__dirname, 'userdata', 'saveData.json');
+const userDataPath = app.getPath('userData');
+const statsFilePath = path.join(userDataPath, 'saveData.json');
+// Test
+let currentHackName;
 
 // Function to save stats to a JSON file
 function saveStats(hackName, statsData) {
+    console.log('Saving stats:', statsFilePath)
     fs.readFile(statsFilePath, (err, data) => {
         if (err && err.code !== 'ENOENT') {
             console.error('Error reading stats file:', err);
@@ -37,6 +45,7 @@ function saveStats(hackName, statsData) {
 
 // Function to load stats from a JSON file
 function loadStats(hackName, callback) {
+    console.log('Loading stats:', statsFilePath)
     fs.readFile(statsFilePath, (err, data) => {
         if (err && err.code === 'ENOENT') {
             console.log('Stats file not found, initializing new stats file.');
@@ -101,6 +110,8 @@ function startServer(data) {
         const hackName = req.query.hackName || data.hackName;
         const author = req.query.author || data.author;
 
+        currentHackName = hackName;
+
         loadStats(hackName, (statsData) => {
             res.render('tracker', { hackName, author, stats: statsData });
         });
@@ -133,6 +144,11 @@ function startServer(data) {
         },
         timerStop: () => {
             console.log('Timer stopped');
+            saveStats(data.hackName, {
+                deathCount: statTracker.getDeaths(),
+                timer: statTracker.getElapsedTime(),
+                exitCount: statTracker.getExits()
+              });
             clearInterval(global.timerBroadcastInterval);
             global.timerBroadcastInterval = null;
             statTracker.stopTimer();
@@ -140,6 +156,11 @@ function startServer(data) {
         },
         exitUpdate: (exits) => {
             statTracker.setExits(exits);
+            saveStats(data.hackName, {
+                deathCount: statTracker.getDeaths(),
+                timer: statTracker.getElapsedTime(),
+                exitCount: statTracker.getExits()
+              });
             broadcast({ type: 'exit', message: statTracker.getExits() });
         }
     });
@@ -148,6 +169,11 @@ function startServer(data) {
 
 // Stop the Express server
 function stopServer() {
+    saveStats(currentHackName, {
+        deathCount: statTracker.getDeaths(),
+        timer: statTracker.getElapsedTime(),
+        exitCount: statTracker.getExits()
+      });
     stopWebSocketServer();
     if (server) {
         server.close(() => {

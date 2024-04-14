@@ -63,7 +63,7 @@ function createWindow() {
             event.preventDefault();
             mainWindow.webContents.send('close-save-data');
         });
-    
+
         ipcMain.on('close-save-data-response', () => {
             mainWindow.destroy(); // Now close the window
         });
@@ -77,11 +77,18 @@ function createWindow() {
     attachTitlebarToWindow(mainWindow);
 }
 
+const userDataPath = app.getPath('userData');
+
 async function readLastPlayed() {
-    const filePath = path.join(__dirname, 'userData', 'lastPlayed.json');
+    const filePath = path.join(userDataPath, 'lastPlayed.json');
     try {
+        if (!fs.existsSync(filePath)) {
+            // If the file doesn't exist, create it with default data
+            const defaultData = {}; // Empty object as default data
+            await fsp.writeFile(filePath, JSON.stringify(defaultData), 'utf8');
+        }
         const data = await fsp.readFile(filePath, 'utf8');
-        if (data.trim()) {
+        if (data && data.trim() && data.trim() !== '{}') {
             const lastPlayed = JSON.parse(data);
             mainWindow.webContents.send('load-data', lastPlayed);
         } else {
@@ -93,12 +100,12 @@ async function readLastPlayed() {
 }
 
 function saveLastPlayed(data) {
-    const filePath = path.join(__dirname, 'userData', 'lastPlayed.json');
+    const filePath = path.join(userDataPath, 'lastPlayed.json');
     fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8', (err) => {
         if (err) {
             console.log('Error saving lastPlayed.json:', err);
         } else {
-            console.log('Data saved successfully!');
+            console.log('Data saved successfully!', filePath);
         }
     });
 }
@@ -107,7 +114,7 @@ function saveLastPlayed(data) {
 app.whenReady().then(() => {
     createWindow();
 
-    fs.readFile(path.join(__dirname, 'userData', 'lastPlayed.json'), 'utf8', (err, data) => {
+    fs.readFile(path.join(userDataPath, 'lastPlayed.json'), 'utf8', (err, data) => {
         if (err) {
             console.log('Error reading lastPlayed.json:', err);
             return;

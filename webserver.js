@@ -7,17 +7,15 @@ const QUSB2SNESConnection = require('./2snesbridge.js');
 const electron = require('electron');
 const app = electron.app || electron.remote.app;
 
-
-const serverApp = express();
 const port = 3000;
 let server;
 let wss;
 let snes;
 let statTracker = new DeathTracker();
-// const statsFilePath = path.join(__dirname, 'userdata', 'saveData.json');
+
 const userDataPath = app.getPath('userData');
 const statsFilePath = path.join(userDataPath, 'saveData.json');
-// Test
+
 let currentHackName;
 
 // Function to save stats to a JSON file
@@ -101,15 +99,15 @@ function broadcast(data) {
 }
 
 // Start the Express server
-function startServer(data) {
+function startServer(initData) {
+    const serverApp = express();
+    let data = initData;
     serverApp.use(express.static(path.join(__dirname, 'tracker', 'public')));
     serverApp.set('views', path.join(__dirname, 'tracker', 'views'));
     serverApp.set('view engine', 'ejs');
-
     serverApp.get('/', (req, res) => {
         const hackName = req.query.hackName || data.hackName;
         const author = req.query.author || data.author;
-
         currentHackName = hackName;
 
         loadStats(hackName, (statsData) => {
@@ -178,8 +176,8 @@ function stopServer() {
     if (server) {
         server.close(() => {
             console.log('Express webserver stopped');
-            server = null;
         });
+        server = null;
     }
 }
 
